@@ -1,6 +1,6 @@
 # ecommerce
 
-Hello! I am someone who enjoying while software developing and this is one web application which demonstarate that demonstrates an e-commerce platform.
+Hello! I am someone who enjoying while software developing and this is one web application that demonstrates an e-commerce platform.
 I developed it using Java Spring Boot for backend and for database is used PostgreSQL.
 In application is implemented Spring Security to authenticate and authorize users.
 For frontend is used Thymeleaf for server-side HTML rendering 
