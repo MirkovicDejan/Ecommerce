@@ -9,4 +9,7 @@ Writen are also .js files specific for this application for additional funcinali
 
 The application is for now a demo version and is open source available for further research and customization.
 
+Credentials for admin is:
+email: admin@email.com
+password: admin
 If you want to see how the application works, watch this video: https://youtu.be/bGGBleqHQbM
