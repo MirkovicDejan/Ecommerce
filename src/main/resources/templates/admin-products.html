@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin panel</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row justify-content-between">
+        <div class="col-auto">
+            <h4 style="color: white;">PRODUCTS</h4>
+            <h5 style="color: white;">Welcome: <span th:text="${userLogin}"></span></h5>
+        </div>
+        <div class="col-auto">
+            <form th:action="@{/logout}" method="post">
+                <input type="submit" class="btn-delete btn-sm" value="Logout">
+            </form>
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-12">
+            <form th:action="@{/admin/admin-panel}" method="get" class="form-inline">
+                <div class="form-row">
+                    <div class="col-8 col-sm-9 col-md-10">
+                        <input type="text" class="form-control form-control-sm w-100" id="searchKeyword" name="searchKeyword" placeholder="Search">
+                    </div>
+                    <div class="col-4 col-sm-3 col-md-2">
+                        <button type="submit" class="btn btn-primary btn-sm ">SEARCH</button>
+                    </div>
+                </div>
+            </form>
+            <br>
+            <div class="filter-buttons">
+                <a th:href="@{/admin/admin-panel}" class="btn btn-primary btn-sm">SEE ALL PRODUCTS</a>
+                <a th:href="@{/admin/admin-panel(category='Clothes')}" class="btn btn-primary btn-sm">SEE CLOTHES</a>
+                <a th:href="@{/admin/admin-panel(category='Shoes')}" class="btn btn-primary btn-sm">SEE SHOES</a>
+                <a th:href="@{/admin/admin-panel(category='Technics')}" class="btn btn-primary btn-sm">SEE TECHNICS</a>
+                <button class="btn-success btn-sm" data-toggle="modal" data-target="#addProductModal">ADD PRODUCT
+                </button>
+                <a th:href="@{/shop/shop-panel}" class="btn btn-primary btn-sm">GO TO SHOP</a>
+            </div>
+            <br>
+            <div class="item-list">
+                <div class="table-responsive">
+                    <table class="table table-bordered" th:if="${itemsPage != null and itemsPage.totalElements > 0}">
+                        <thead>
+                        <tr>
+                            <th>NAME</th>
+                            <th>DESCRIPTION</th>
+                            <th>PRICE</th>
+                            <th>CATEGORY</th>
+                            <th>IMAGE</th>
+                            <th>EDIT</th>
+                            <th>DELETE</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <th:block th:each="item : ${itemsPage.content}">
+                            <tr>
+                                <td class="item-id" th:text="${item.getId()}" style="display: none;"></td>
+                                <td class="item-name" th:text="${item.getName()}"></td>
+                                <td class="item-description" th:text="${item.getDescription()}"></td>
+                                <td class="item-price" th:text="${item.getPrice()}"></td>
+                                <td class="item-category" th:text="${item.getCategory()}"></td>
+                                <td><img th:src="'data:image/jpeg;base64,' + ${item.getBase64Image()}" width="70"
+                                         height="70"></td>
+                                <td>
+                                    <a class="btn-update btn-sm" data-toggle="modal" data-target="#editModal">
+                                        EDIT
+                                    </a>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/delete-item/{id}(id=${item.getId()})}"
+                                       class="btn-delete btn-sm">DELETE</a>
+                                </td>
+                            </tr>
+                        </th:block>
+                        </tbody>
+                    </table>
+                    <div th:if="${checkSize == 0}">
+                        <h4 style="color: goldenrod;">No products for shown!</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="pagination">
+                <a th:if="${itemsPage != null and itemsPage.hasPrevious() and searchKeyword != null}"
+                   th:href="@{/admin/admin-panel(searchKeyword=${searchKeyword}, page=${itemsPage.number - 1})}"
+                   class="btn btn-primary btn-sm">Previous</a>
+                <a th:if="${itemsPage != null and itemsPage.hasPrevious() and category != null}"
+                   th:href="@{/admin/admin-panel(category=${category}, page=${itemsPage.number - 1})}"
+                   class="btn btn-primary btn-sm">Previous</a>
+                <a th:if="${itemsPage != null and itemsPage.hasPrevious() and category == null and searchKeyword == null}"
+                   th:href="@{/admin/admin-panel(page=${itemsPage.number - 1})}"
+                   class="btn btn-primary btn-sm">Previous</a>
+                <span th:if="${itemsPage != null}" th:text="${itemsPage.number + 1}"></span>/<span
+                    th:if="${itemsPage != null}" th:text="${itemsPage.totalPages}"></span>
+                <a th:if="${itemsPage != null and checkSize == 4 and category != null}"
+                   th:href="@{/admin/admin-panel(category=${category}, page=${itemsPage.number + 1})}"
+                   class="btn btn-primary btn-sm">Next</a>
+                <a th:if="${itemsPage != null and checkSize == 4 and searchKeyword != null}"
+                   th:href="@{/admin/admin-panel(searchKeyword=${searchKeyword}, page=${itemsPage.number + 1})}"
+                   class="btn btn-primary btn-sm">Next</a>
+                <a th:if="${itemsPage != null and checkSize == 4 and category == null and searchKeyword == null}"
+                   th:href="@{/admin/admin-panel(page=${itemsPage.number + 1})}"
+                   class="btn btn-primary btn-sm">Next</a>
+            </div>
+
+       </div>
+    </div>
+</div>
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="background-color: #4B0150; color: white">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProductModalLabel">Add Product</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <br>
+            <div th:if="${errorMessage}" class="error-message">
+                <p th:text="${errorMessage}"></p>
+            </div>
+            <div class="modal-body">
+                <form th:action="@{/admin/add-item}" method="post" th:object="${item}" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="name">Name:</label>
+                        <input type="text" class="form-control" id="name" name="name"
+                               style="background-color: #4B0150; color: white;">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <input type="text" class="form-control" id="description" name="description"
+                               style="background-color: #4B0150; color: white;">
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Price:</label>
+                        <input type="number" class="form-control" id="price" name="price" min="0" value="0" step=".01"
+                               style="background-color: #4B0150; color: white;">
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Category:</label>
+                        <select id="category" name="category" class="form-control"
+                                style="background-color: #4B0150; color: white;">
+                            <option value="Clothes">Clothes</option>
+                            <option value="Shoes">Shoes</option>
+                            <option value="Technics">Technics</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="image">Image:</label>
+                        <input type="file" class="form-control-file" id="image" name="image"
+                               style="background-color: #4B0150; color: white;">
+                    </div>
+                    <button type="submit" class="btn-success btn-sm">Add</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Item Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="background-color: #4B0150; color: white">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Product</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-form" th:action="@{/admin/edit-item}" method="post" enctype="multipart/form-data">
+                    <input type="hidden" id="edit-id" name="id">
+                    <div class="form-group">
+                        <label for="edit-name">Name:</label>
+                        <input type="text" class="form-control" id="edit-name" name="name"
+                               style="background-color: #4B0150; color: white;">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-description">Description:</label>
+                        <input type="text" class="form-control" id="edit-description" name="description"
+                               style="background-color: #4B0150; color: white;">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-price">Price:</label>
+                        <input type="number" class="form-control" id="edit-price" name="price" min="0" value="0"
+                               step=".01"
+                               style="background-color: #4B0150; color: white;">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-category">Category:</label>
+                        <select class="form-control" id="edit-category" name="category"
+                                style="background-color: #4B0150; color: white;">
+                            <option value="Clothes">Clothes</option>
+                            <option value="Shoes">Shoes</option>
+                            <option value="Technics">Technics</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-image">Image:</label>
+                        <input type="file" class="form-control-file" id="edit-image" name="image"
+                               style="background-color: #4B0150; color: white;">
+                    </div>
+                    <button type="submit" class="btn-update btn-sm">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../static/js/jquery-3.7.1.min.js"></script>
+<script src="../static/js/bootstrap.min.js"></script>
+<script src="../static/js/adminProductsScript.js"></script>
+</body>
+</html>

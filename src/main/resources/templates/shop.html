@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <meta charset="UTF-8">
+    <title>Shop</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row justify-content-between">
+        <div class="col-auto">
+            <h4 style="color: white;">SHOP</h4>
+            <h5 style="color: white;">Welcome: <span th:text="${userLogin}"></span></h5>
+            <h5 style="color: goldenrod;" th:if="${billTime}">Your Bill created at: <span th:text="${billTime}"></span> is ready for download!</h5>
+        </div>
+        <div class="col-auto">
+            <form th:action="@{/logout}" method="post">
+                <input type="submit" class="btn-delete btn-sm" value="Logout">
+            </form>
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-12">
+            <form th:action="@{/shop/shop-panel}" method="get" class="form-inline">
+                <div class="form-row">
+                    <div class="col-8 col-sm-9 col-md-10">
+                        <input type="text" class="form-control form-control-sm w-100" id="searchKeyword"
+                               name="searchKeyword" placeholder="Search">
+                    </div>
+                    <div class="col-4 col-sm-3 col-md-2">
+                        <button type="submit" class="btn btn-primary btn-sm">SEARCH</button>
+                    </div>
+                </div>
+            </form>
+            <br>
+            <div class="filter-buttons">
+                <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/admin-panel}" class="btn btn-primary btn-sm">GO TO ADMIN PANEL</a>
+                <a th:href="@{/shop/shop-panel}" class="btn btn-primary btn-sm">SEE ALL PRODUCTS</a>
+                <a th:href="@{/shop/shop-panel(category='Clothes')}" class="btn btn-primary btn-sm">SEE CLOTHES</a>
+                <a th:href="@{/shop/shop-panel(category='Shoes')}" class="btn btn-primary btn-sm">SEE SHOES</a>
+                <a th:href="@{/shop/shop-panel(category='Technics')}" class="btn btn-primary btn-sm">SEE TECHNICS</a>
+                <a href="#" class="btn btn-warning btn-sm" style="color: white;" data-toggle="modal" data-target="#billModal">SEE BILL</a>
+                <a th:if="${billId != null}" th:href="@{/shop/download(billId=${billId})}" class="btn btn-warning btn-sm" id="download-bill" style="color: white;">DOWNLOAD BILL</a>
+            </div>
+            <br>
+            <div class="item-list">
+                <div class="table-responsive">
+                    <table class="table table-bordered" th:if="${itemsPage != null and itemsPage.totalElements > 0}">
+                        <thead>
+                        <tr>
+                            <th>NAME</th>
+                            <th>DESCRIPTION</th>
+                            <th>PRICE</th>
+                            <th>CATEGORY</th>
+                            <th>IMAGE</th>
+                            <th>ADD TO BILL</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <th:block th:each="item : ${itemsPage.content}">
+                            <tr>
+                                <td th:text="${item.getName()}"></td>
+                                <td th:text="${item.getDescription()}"></td>
+                                <td th:text="${item.getPrice()}"></td>
+                                <td th:text="${item.getCategory()}"></td>
+                                <td><img th:src="'data:image/jpeg;base64,' + ${item.getBase64Image()}" width="70"
+                                         height="70"></td>
+                                <td>
+                                    <div class="input-group">
+                                        <label th:for="${'quantity_' + item.getId()}"></label>
+                                        <form th:action="@{/shop/item-to-bill}" method="post">
+                                            <input type="number" class="form-control form-control-sm"
+                                                   th:id="${'quantity_' + item.getId()}" name="quantity" value="1"
+                                                   min="1">
+                                            <input type="hidden" name="itemId" th:value="${item.getId()}">
+                                            <input type="hidden" name="category" th:value="${category}">
+                                            <input type="hidden" name="searchKeyword" th:value="${searchKeyword}">
+                                            <input type="hidden" name="page" th:value="${itemsPage.number}">
+                                            <div class="input-group-append">
+                                                <button type="submit" class="btn btn-success btn-sm">ADD TO BILL
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </th:block>
+                        </tbody>
+                    </table>
+                    <div th:if="${checkSize == 0}">
+                        <h4 style="color: goldenrod;">No products found!</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="pagination">
+                <a th:if="${itemsPage != null and itemsPage.hasPrevious() and searchKeyword != null}"
+                   th:href="@{/shop/shop-panel(searchKeyword=${searchKeyword}, page=${itemsPage.number - 1})}"
+                   class="btn btn-primary btn-sm">Previous</a>
+                <a th:if="${itemsPage != null and itemsPage.hasPrevious() and category != null}"
+                   th:href="@{/shop/shop-panel(category=${category}, page=${itemsPage.number - 1})}"
+                   class="btn btn-primary btn-sm">Previous</a>
+                <a th:if="${itemsPage != null and itemsPage.hasPrevious() and category == null and searchKeyword == null}"
+                   th:href="@{/shop/shop-panel(page=${itemsPage.number - 1})}"
+                   class="btn btn-primary btn-sm">Previous</a>
+                <span th:if="${itemsPage != null}" th:text="${itemsPage.number + 1}"></span>/<span
+                    th:if="${itemsPage != null}" th:text="${itemsPage.totalPages}"></span>
+                <a th:if="${itemsPage != null and checkSize == 4 and category != null}"
+                   th:href="@{/shop/shop-panel(category=${category}, page=${itemsPage.number + 1})}"
+                   class="btn btn-primary btn-sm">Next</a>
+                <a th:if="${itemsPage != null and checkSize == 4 and searchKeyword != null}"
+                   th:href="@{/shop/shop-panel(searchKeyword=${searchKeyword}, page=${itemsPage.number + 1})}"
+                   class="btn btn-primary btn-sm">Next</a>
+                <a th:if="${itemsPage != null and checkSize == 4 and category == null and searchKeyword == null}"
+                   th:href="@{/shop/shop-panel(page=${itemsPage.number + 1})}"
+                   class="btn btn-primary btn-sm">Next</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="billModal" tabindex="-1" role="dialog" aria-labelledby="billModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" style="background-color: #4B0150; color: white;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="billModalLabel">Bill Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div th:if="${errorMessage}" class="error-message">
+                <p th:text="${errorMessage}"></p>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>NAME</th>
+                        <th>PRICE</th>
+                        <th>QUANTITY</th>
+                        <th>REMOVE</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <th:block th:each="billItem : ${billItems}">
+                        <tr>
+                            <td th:text="${billItem.getItem().getName()}"></td>
+                            <td th:text="${billItem.getItemPrice()}"></td>
+                            <td th:text="${billItem.getQuantity()}"></td>
+                            <td>
+                                <form th:action="@{/shop/remove-from-bill}" method="post" class="remove-from-bill-form">
+                                    <input type="hidden" name="itemId" th:value="${billItem.getItem().getId()}">
+                                    <input type="hidden" name="category" th:value="${category}">
+                                    <input type="hidden" name="searchKeyword" th:value="${searchKeyword}">
+                                    <input type="hidden" name="page" th:value="${page}">
+                                    <button type="submit" class="btn btn-danger btn-sm">REMOVE</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </th:block>
+                    </tbody>
+                </table>
+                <h5>Total Amount: <span th:text="${totalAmount}"></span></h5>
+            </div>
+            <div class="modal-footer">
+                <form id="generateBillForm" th:action="@{/shop/generate-bill}" method="post">
+                    <button type="submit" class="btn btn-success">Generate Bill</button>
+                </form>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../static/js/jquery-3.7.1.min.js"></script>
+<script src="../static/js/bootstrap.min.js"></script>
+<script src="../static/js/shopScript.js"></script>
+</body>
+</html>
