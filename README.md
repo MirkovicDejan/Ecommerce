@@ -8,3 +8,5 @@ combined with jQuery for dynamic frontend interactions and frontend is styled wi
 Writen are also .js files specific for this application for additional funcinalities and interactions for Frontend.
 
 The application is for now a demo version and is open source available for further research and customization.
+
+If you want to see how the application works, watch this video: https://youtu.be/bGGBleqHQbM
