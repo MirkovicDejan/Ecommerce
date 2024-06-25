@@ -7,4 +7,4 @@ For frontend is used Thymeleaf for server-side HTML rendering
 combined with jQuery for dynamic frontend interactions and frontend is styled with custom CSS and Bootstrap for responsive user interface design.
 Writen are also .js files specific for this application for additional funcinalities and interactions for Frontend.
 
-The application is for now a demo version and is open source available for further research and customization according to user needs.
+The application is for now a demo version and is open source available for further research and customization.
