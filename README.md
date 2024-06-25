@@ -1,7 +1,7 @@
 # ecommerce
 
 Hello! I am someone who enjoying while software developing and this is one web application that demonstrates an e-commerce platform.
-I developed it using Java Spring Boot for backend and for database is used PostgreSQL.
+I developed it using Java Spring Boot for backend, for database is used PostgreSQL and Flyway is used for database migrations.
 In application is implemented Spring Security to authenticate and authorize users.
 For frontend is used Thymeleaf for server-side HTML rendering 
 combined with jQuery for dynamic frontend interactions and frontend is styled with custom CSS and Bootstrap for responsive user interface design.
